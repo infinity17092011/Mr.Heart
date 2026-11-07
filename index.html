@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mr.Heart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--red:#e11d2a;--ink:#16101a;--sky:#e3ebff;--navy:#1b2a8f;--card:#fff;--muted:#5b5670}
+@media (prefers-color-scheme:dark){:root{--sky:#14183a;--card:#232650;--ink:#fff;--muted:#b8b6d6}}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:Nunito,system-ui,sans-serif;font-weight:600;background:var(--sky);color:var(--ink);padding-top:env(safe-area-inset-top,0px)}
+h1,h2,.big{font-family:'Lilita One',Impact,sans-serif;font-weight:400;letter-spacing:.5px}
+main{max-width:460px;margin:auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.screen{display:none}.screen.on{display:block}
+.logo{font-size:30px;text-align:center;color:var(--red);-webkit-text-stroke:1.5px #16101a;paint-order:stroke fill}
+.plus{display:none;font-size:14px;background:var(--navy);color:#fff;border-radius:8px;padding:2px 8px;vertical-align:middle;-webkit-text-stroke:0}
+.plus.on{display:inline-block}
+.stage{display:flex;justify-content:center;margin:6px 0 0}
+.stage img{width:min(78vw,340px);height:min(60vw,300px);object-fit:contain}
+.say{text-align:center;font-size:19px;margin:4px 8px 14px;min-height:46px}
+.stats{display:flex;gap:10px;margin-bottom:16px}
+.stat{flex:1;background:var(--card);border:3px solid #16101a;border-radius:14px;padding:10px;text-align:center;box-shadow:3px 3px 0 #16101a}
+.stat b{display:block;font-family:'Lilita One',Impact,sans-serif;font-weight:400;font-size:28px;color:var(--red)}
+.stat span{font-size:13px;color:var(--muted)}
+.btn{display:block;width:100%;font:inherit;font-family:'Lilita One',Impact,sans-serif;font-size:24px;color:#fff;background:var(--red);border:3px solid #16101a;border-radius:16px;padding:16px;box-shadow:0 6px 0 #16101a;cursor:pointer;text-align:center;text-decoration:none}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #16101a}
+.btn[disabled]{background:#9a97ad;cursor:default}
+.btn.alt{background:var(--navy);font-size:18px;padding:12px;margin-top:14px}
+.btn.grey{background:#9a97ad}
+:focus-visible{outline:3px solid var(--navy);outline-offset:3px}
+.card{background:var(--card);border:3px solid #16101a;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:3px 3px 0 #16101a}
+h2{font-size:26px;margin:6px 0 12px}
+.days{display:flex;justify-content:space-between;margin-top:10px}
+.day{text-align:center;font-size:12px;color:var(--muted)}
+.dot{width:30px;height:30px;border-radius:50%;border:3px solid #16101a;margin:0 auto 4px;background:var(--card)}
+.dot.hit{background:var(--red)}
+.bar{height:16px;border:3px solid #16101a;border-radius:10px;overflow:hidden;background:var(--card);margin-top:8px}
+.bar i{display:block;height:100%;background:var(--red)}
+input{width:100%;font:inherit;font-size:17px;padding:12px;margin-top:10px;border:3px solid #16101a;border-radius:12px;background:var(--card);color:var(--ink)}
+.err{color:var(--red);min-height:22px;margin-top:8px;font-size:15px}
+.overlay{position:fixed;inset:0;display:none;z-index:30;padding:20px;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+#auth{background:var(--sky);flex-direction:column}
+#auth .card{width:100%;max-width:380px;text-align:center}
+#auth img{width:150px}
+#pw{background:rgba(22,16,26,.6)}
+#pw .card{max-width:360px;text-align:center;padding:22px}
+#ex{background:var(--sky);flex-direction:column;text-align:center;z-index:20}
+#ex .move{font-size:40px}
+#ex img{width:min(60vw,260px);height:min(60vw,260px);object-fit:contain;margin-bottom:6px}
+#ex .time{font-size:120px;line-height:1;color:var(--red);-webkit-text-stroke:3px #16101a;paint-order:stroke fill}
+#ex .nxt{color:var(--muted);margin:8px 0 28px}
+#ex .btn{max-width:300px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:3px solid #16101a;padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
+nav button{flex:1;font:inherit;font-family:'Lilita One',Impact,sans-serif;font-size:17px;padding:14px 0;border:0;background:none;color:var(--muted);cursor:pointer}
+nav button.on{color:var(--red)}
+@media (prefers-reduced-motion:no-preference){.stage img{animation:bob 3s ease-in-out infinite}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+</style>
+</head>
+<body>
+<main>
+  <section id="home" class="screen on">
+    <h1 class="logo">Mr.Heart <span class="plus" id="plusTag">Plus</span></h1>
+    <div class="stage"><img id="mascot" alt="Mr.Heart" src="heart-awake.png"></div>
+    <p class="say big" id="say"></p>
+    <div class="stats">
+      <div class="stat"><b id="sStreak">0</b><span>day streak</span></div>
+      <div class="stat"><b id="sXp">0</b><span>XP</span></div>
+      <div class="stat"><b id="sLvl">1</b><span>level</span></div>
+    </div>
+    <button class="btn" id="start">Start exercise</button>
+  </section>
+
+  <section id="progress" class="screen">
+    <h2>Your progress</h2>
+    <div class="card">
+      <div class="big" style="font-size:22px">Level <span id="pLvl">1</span></div>
+      <div class="bar"><i id="pBar" style="width:0"></i></div>
+      <p style="color:var(--muted);margin-top:6px"><span id="pToNext">200</span> XP to next level</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="pBest">0</b><span>best streak</span></div>
+      <div class="stat"><b id="pTotal">0</b><span>workouts</span></div>
+    </div>
+    <div class="card"><b>Last 7 days</b><div class="days" id="week"></div></div>
+    <div class="card" id="plusCard"></div>
+    <button class="btn alt grey" id="signout">Log out</button>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-go="home">Home</button>
+  <button data-go="progress">Progress</button>
+</nav>
+
+<div id="auth" class="overlay on" role="dialog" aria-label="Log in">
+  <div class="card">
+    <img src="heart-awake.png" alt="">
+    <h2>Join Mr.Heart</h2>
+    <input id="email" type="email" placeholder="Email" autocomplete="email">
+    <input id="pass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+    <p class="err" id="authMsg"></p>
+    <button class="btn alt" id="signin">Log in</button>
+    <button class="btn alt grey" id="signup">Create account</button>
+  </div>
+</div>
+
+<div id="ex" class="overlay" role="dialog" aria-label="Workout">
+  <img id="exImg" alt="" src="heart-awake.png">
+  <p class="big" id="exPhase" style="font-size:22px;color:var(--navy)"></p>
+  <p class="big move" id="exMove"></p>
+  <p class="big time" id="exTime">30</p>
+  <p class="nxt" id="exNext"></p>
+  <button class="btn grey" id="exQuit">Quit</button>
+</div>
+
+<div id="pw" class="overlay" role="dialog" aria-label="Mr.Heart Plus">
+  <div class="card">
+    <img src="heart-awake.png" alt="" width="140">
+    <h2>Streak started!</h2>
+    <p>Mr.Heart Plus unlocks the full workout library, stats and streak freezes. Try 7 days free.</p>
+    <a class="btn alt" href="/paywall.html">See Plus</a>
+    <button class="btn alt grey" id="pwClose">Not now</button>
+  </div>
+</div>
+
+<script>
+const MOVES = ['Jumping jacks','Squats','High knees','Push-ups','Plank'];
+const SITE_URL = 'https://mr-heart.onrender.com';
+const WORK = 30, REST = 10;
+// Add a GIF per move here as you get them. Missing ones show the standing Mr.Heart.
+const MOVE_IMG = { 'Push-ups': 'move-pushups.gif' };
+const $ = id => document.getElementById(id);
+
+const todayStr = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const dayNum = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+
+let S = { xp: 0, streak: 0, best: 0, total: 0, last: null, hist: [] };
+let sb = null, token = null, isPlus = false;
+
+// Test the sleepy states: add ?missed=1, ?missed=2 or ?missed=3 to the URL
+const sim = new URLSearchParams(location.search).get('missed');
+
+// ---------- Server sync ----------
+const api = (path, opts = {}) => fetch(path, {
+  ...opts,
+  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }
+});
+
+function save() {
+  if (!token || sim !== null) return;
+  api('/api/progress', { method: 'PUT', body: JSON.stringify(S) }).catch(() => {});
+}
+
+async function loadMe() {
+  try {
+    const res = await api('/api/me');
+    if (!res.ok) throw new Error();
+    const me = await res.json();
+    Object.assign(S, me.profile);
+    isPlus = !!me.plus;
+  } catch (e) {
+    $('authMsg').textContent = 'Could not reach the server. Try again.';
+    return;
+  }
+  $('auth').classList.remove('on');
+  render();
+}
+
+// ---------- Auth ----------
+async function boot() {
+  const cfg = await (await fetch('/api/config')).json();
+  sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  sb.auth.onAuthStateChange((event, session) => {
+    token = session ? session.access_token : null;
+    if (session) loadMe(); else $('auth').classList.add('on');
+  });
+}
+
+async function authAction(isSignup) {
+  const email = $('email').value.trim(), password = $('pass').value;
+  $('authMsg').textContent = '';
+  if (!email || password.length < 6) { $('authMsg').textContent = 'Enter your email and a password of 6+ characters.'; return; }
+  const { data, error } = isSignup
+    ? await sb.auth.signUp({ email, password, options: { emailRedirectTo: SITE_URL } })
+    : await sb.auth.signInWithPassword({ email, password });
+  if (error) { $('authMsg').textContent = error.message; return; }
+  if (isSignup && !data.session) $('authMsg').textContent = 'Check your email to confirm, then log in.';
+}
+$('signin').onclick = () => authAction(false);
+$('signup').onclick = () => authAction(true);
+$('signout').onclick = async () => {
+  await sb.auth.signOut();
+  S = { xp: 0, streak: 0, best: 0, total: 0, last: null, hist: [] };
+  isPlus = false;
+};
+
+// ---------- Streak + rendering ----------
+function missedDays() {
+  if (sim !== null) return Number(sim);
+  if (!S.last) return 0;
+  return Math.max(0, dayNum(todayStr()) - dayNum(S.last) - 1);
+}
+const doneToday = () => S.last === todayStr() && sim === null;
+
+function render() {
+  const m = missedDays();
+  if (m >= 3 && S.streak > 0 && sim === null) { S.streak = 0; save(); }
+  const shownStreak = m >= 3 ? 0 : S.streak;
+
+  let img = 'heart-awake.png', msg = 'Ready when you are!';
+  if (!S.last && sim === null) msg = 'Hi, I\'m Mr.Heart. Let\'s start your streak!';
+  else if (doneToday()) msg = 'Nice work! Come back tomorrow.';
+  else if (m === 1) { img = 'heart-sleepy.png'; msg = 'Zzz... I\'m getting sleepy. Work out!'; }
+  else if (m === 2) { img = 'heart-sleepy.png'; msg = 'Zzz... one more day and I\'m out cold!'; }
+  else if (m >= 3) { img = 'heart-bed.png'; msg = 'Mr.Heart fell asleep. Streak reset. Wake him up!'; }
+  $('mascot').src = img; $('say').textContent = msg;
+  $('plusTag').classList.toggle('on', isPlus);
+
+  const lvl = Math.floor(S.xp / 200) + 1;
+  $('sStreak').textContent = shownStreak; $('sXp').textContent = S.xp; $('sLvl').textContent = lvl;
+  $('start').disabled = doneToday();
+  $('start').textContent = doneToday() ? 'Done for today' : (m >= 3 ? 'Wake up Mr.Heart' : 'Start exercise');
+
+  $('pLvl').textContent = lvl; $('pBar').style.width = (S.xp % 200) / 2 + '%';
+  $('pToNext').textContent = 200 - (S.xp % 200);
+  $('pBest').textContent = S.best; $('pTotal').textContent = S.total;
+
+  const names = ['S','M','T','W','T','F','S']; let wk = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    wk += `<div class="day"><div class="dot ${S.hist.includes(todayStr(d)) ? 'hit' : ''}"></div>${names[d.getDay()]}</div>`;
+  }
+  $('week').innerHTML = wk;
+
+  $('plusCard').innerHTML = isPlus
+    ? '<b>Mr.Heart Plus is active.</b>'
+    : '<b>Get Mr.Heart Plus</b><p style="color:var(--muted)">Full workout library, stats and streak freezes. 7 days free.</p><a class="btn alt" href="/paywall.html">See Plus</a>';
+}
+
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === b.dataset.go));
+});
+
+// ---------- Workout ----------
+let plan = [], idx = 0, left = 0, timer = null;
+function buildPlan() {
+  plan = [];
+  MOVES.forEach((m, i) => {
+    plan.push({ name: m, secs: WORK, rest: false });
+    if (i < MOVES.length - 1) plan.push({ name: 'Rest', secs: REST, rest: true, next: MOVES[i + 1] });
+  });
+}
+function showStep() {
+  const p = plan[idx];
+  $('exPhase').textContent = p.rest ? 'Rest' : 'Go! (' + (Math.floor(idx / 2) + 1) + ' of ' + MOVES.length + ')';
+  $('exMove').textContent = p.rest ? 'Breathe' : p.name;
+  $('exNext').textContent = p.rest ? 'Next: ' + p.next : (plan[idx + 1] ? 'Then rest' : 'Last move!');
+  $('exTime').textContent = left;
+  $('exImg').src = p.rest ? 'heart-awake.png' : (MOVE_IMG[p.name] || 'heart-awake.png');
+}
+function tick() {
+  left--;
+  if (left <= 0) {
+    idx++;
+    if (idx >= plan.length) return finish();
+    left = plan[idx].secs;
+  }
+  showStep();
+}
+$('start').onclick = () => {
+  buildPlan(); idx = 0; left = plan[0].secs; showStep();
+  $('ex').classList.add('on'); clearInterval(timer); timer = setInterval(tick, 1000);
+};
+$('exQuit').onclick = () => { clearInterval(timer); $('ex').classList.remove('on'); };
+
+function finish() {
+  clearInterval(timer); $('ex').classList.remove('on');
+  const first = S.total === 0;
+  if (S.last !== todayStr()) {
+    S.streak = missedDays() >= 3 ? 1 : S.streak + 1;
+    S.best = Math.max(S.best, S.streak);
+    S.xp += 50 + Math.min(S.streak, 10) * 5;
+    S.total++; S.last = todayStr(); S.hist.push(S.last);
+    save();
+  }
+  render();
+  if (first && !isPlus) $('pw').classList.add('on');
+}
+$('pwClose').onclick = () => $('pw').classList.remove('on');
+
+boot();
+</script>
+</body>
+</html>
