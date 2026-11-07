@@ -95,6 +95,7 @@ async function getPlus(user) {
 const toProfile = (p) => ({
   xp: p.xp, streak: p.streak, best: p.best, total: p.total,
   last: p.last_workout, hist: p.hist || [],
+  exercises: p.exercises || [], level: p.level || 'beginner',
 });
 
 // ---------- Routes ----------
@@ -112,7 +113,7 @@ app.get('/api/me', requireUser, async (req, res) => {
       profile = ins.data;
     }
     const plus = await getPlus(req.user);
-    res.json({ profile: toProfile(profile), ...plus });
+    res.json({ profile: toProfile(profile), email: req.user.email, ...plus });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -125,12 +126,15 @@ app.put('/api/progress', requireUser, async (req, res) => {
     const int = (v) => Math.max(0, Math.min(1000000, parseInt(v, 10) || 0));
     const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
     const hist = (Array.isArray(b.hist) ? b.hist : []).filter(isDate).slice(-90);
+    const exercises = (Array.isArray(b.exercises) ? b.exercises : [])
+      .filter((x) => typeof x === 'string' && x.length <= 40).slice(0, 60);
+    const level = ['beginner', 'intermediate', 'pro'].includes(b.level) ? b.level : 'beginner';
     const { error } = await supabase.from('profiles').upsert({
       id: req.user.id,
       email: req.user.email,
       xp: int(b.xp), streak: int(b.streak), best: int(b.best), total: int(b.total),
       last_workout: isDate(b.last) ? b.last : null,
-      hist,
+      hist, exercises, level,
       updated_at: new Date().toISOString(),
     });
     if (error) throw error;
