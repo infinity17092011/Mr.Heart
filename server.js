@@ -1,12 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-app.use(cors());
+
+// Frontend lives on Netlify. Set ALLOWED_ORIGINS on Render to your Netlify URL(s),
+// e.g. https://mr-heart.netlify.app (comma-separated). If unset, all origins are allowed.
+const origins = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean);
+app.use(cors(origins.length ? { origin: origins } : {}));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // index.html, paywall.html, images
 
 // ---- Render environment variables ----
 // SUPABASE_URL                 https://xxxx.supabase.co
@@ -16,6 +18,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // index.html, paywall.
 // PAYPAL_CLIENT_SECRET         PayPal secret
 // PAYPAL_ENV                   "live" or "sandbox" (default: live)
 // FREE_ACCESS_EMAILS           comma-separated, e.g. a@x.com,b@y.com
+// ALLOWED_ORIGINS              your Netlify URL, e.g. https://mr-heart.netlify.app
 const {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
@@ -159,6 +162,7 @@ app.post('/api/subscription', requireUser, async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => res.send('Mr.Heart API is running'));
 app.get('/health', (req, res) => res.send('ok'));
 
 const PORT = process.env.PORT || 3000;
